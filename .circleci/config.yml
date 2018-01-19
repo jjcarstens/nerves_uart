@@ -63,8 +63,17 @@ jobs:
           mix deps.get
           mix compile
     - run:
+        name: Build tnt
+        command: |
+            git clone --depth=50 https://github.com/freemed/tty0tty.git
+            make -C tty0tty/module
+            sudo cp tty0tty.ko /lib/modules/$(uname -r)/kernel/drivers/misc/
+            sudo depmod
+            sudo modprobe tty0tty
+            sudo chmod 666 /dev/tnt*
+    - run:
         name: Test
-        command: mix test test/uartless_test.exs
+        command: NERVES_UART_PORT1=tnt0 NERVES_UART_PORT2=tnt1 mix test
     - run:
         name: Check formatting
         command: mix format --check-formatted
